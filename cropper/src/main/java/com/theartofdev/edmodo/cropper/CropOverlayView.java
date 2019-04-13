@@ -37,6 +37,9 @@ public class CropOverlayView extends View {
   /** Gesture detector used for multi touch box scaling */
   private ScaleGestureDetector mScaleDetector;
 
+  /** Scale gesture listener for scaling image */
+  private OnScaleGestureListener scaleGestureListener;
+
   /** Boolean to see if multi touch is enabled for the crop rectangle */
   private boolean mMultiTouchEnabled;
 
@@ -145,6 +148,10 @@ public class CropOverlayView extends View {
     mCropWindowChangeListener = listener;
   }
 
+  public void setScaleGestureListener(OnScaleGestureListener listener) {
+    this.scaleGestureListener = listener;
+  }
+
   /** Get the left/top/right/bottom coordinates of the crop window. */
   public RectF getCropWindowRect() {
     return mCropWindowHandler.getRect();
@@ -204,7 +211,7 @@ public class CropOverlayView extends View {
   public void setCropShape(CropImageView.CropShape cropShape) {
     if (mCropShape != cropShape) {
       mCropShape = cropShape;
-        if (Build.VERSION.SDK_INT <= 17) {
+      if (Build.VERSION.SDK_INT <= 17) {
         if (mCropShape == CropImageView.CropShape.OVAL) {
           mOriginalLayerType = getLayerType();
           if (mOriginalLayerType != View.LAYER_TYPE_SOFTWARE) {
@@ -320,7 +327,7 @@ public class CropOverlayView extends View {
 
   /** Set multi touch functionality to enabled/disabled. */
   public boolean setMultiTouchEnabled(boolean multiTouchEnabled) {
-      if (mMultiTouchEnabled != multiTouchEnabled) {
+    if (mMultiTouchEnabled != multiTouchEnabled) {
       mMultiTouchEnabled = multiTouchEnabled;
       if (mMultiTouchEnabled && mScaleDetector == null) {
         mScaleDetector = new ScaleGestureDetector(getContext(), new ScaleListener());
@@ -629,7 +636,7 @@ public class CropOverlayView extends View {
       }
     } else {
       mPath.reset();
-        if (Build.VERSION.SDK_INT <= 17 && mCropShape == CropImageView.CropShape.OVAL) {
+      if (Build.VERSION.SDK_INT <= 17 && mCropShape == CropImageView.CropShape.OVAL) {
         mDrawRect.set(rect.left + 2, rect.top + 2, rect.right - 2, rect.bottom - 2);
       } else {
         mDrawRect.set(rect.left, rect.top, rect.right, rect.bottom);
@@ -812,8 +819,13 @@ public class CropOverlayView extends View {
   public boolean onTouchEvent(MotionEvent event) {
     // If this View is not enabled, don't allow for touch interactions.
     if (isEnabled()) {
+
       if (mMultiTouchEnabled) {
+        // multitouch is enabled, so let the ScaleDetector listen to all events
         mScaleDetector.onTouchEvent(event);
+
+        // scaling is in progress, do not pass MotionEvent through
+        if (isScalingGestureInProgress) return true;
       }
 
       switch (event.getAction()) {
@@ -1003,38 +1015,35 @@ public class CropOverlayView extends View {
 
   // region: Inner class: ScaleListener
 
+  boolean isScalingGestureInProgress;
   /** Handle scaling the rectangle based on two finger input */
   private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
 
     @Override
+    public boolean onScaleBegin(ScaleGestureDetector detector) {
+      isScalingGestureInProgress = true;
+      mMoveHandler = null;
+      return super.onScaleBegin(detector);
+    }
+
+    @Override
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public boolean onScale(ScaleGestureDetector detector) {
-      RectF rect = mCropWindowHandler.getRect();
-
-      float x = detector.getFocusX();
-      float y = detector.getFocusY();
-      float dY = detector.getCurrentSpanY() / 2;
-      float dX = detector.getCurrentSpanX() / 2;
-
-      float newTop = y - dY;
-      float newLeft = x - dX;
-      float newRight = x + dX;
-      float newBottom = y + dY;
-
-      if (newLeft < newRight
-          && newTop <= newBottom
-          && newLeft >= 0
-          && newRight <= mCropWindowHandler.getMaxCropWidth()
-          && newTop >= 0
-          && newBottom <= mCropWindowHandler.getMaxCropHeight()) {
-
-        rect.set(newLeft, newTop, newRight, newBottom);
-        mCropWindowHandler.setRect(rect);
-        invalidate();
+      if (scaleGestureListener != null) {
+        scaleGestureListener.onScaleGesturePerformed(detector.getScaleFactor());
       }
-
       return true;
     }
+
+    @Override
+    public void onScaleEnd(ScaleGestureDetector detector) {
+      isScalingGestureInProgress = false;
+      super.onScaleEnd(detector);
+    }
+  }
+
+  public interface OnScaleGestureListener {
+    void onScaleGesturePerformed(float scale);
   }
   // endregion
 }
