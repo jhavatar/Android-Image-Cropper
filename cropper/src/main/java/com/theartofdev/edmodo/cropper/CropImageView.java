@@ -394,11 +394,28 @@ public class CropImageView extends FrameLayout {
     }
   }
 
+  /** Adjust zoom with given value */
+  public void adjustZoom(float value) {
+    if (mZoom * value < /* 1f stands for original size */ 1f ||
+        mZoom * value > mMaxZoom) return;
+
+    mZoom *= value;
+    applyImageMatrix(getWidth(), getHeight(), true, false);
+    mCropOverlayView.fixCurrentCropWindowRect();
+  }
+
   /** Set multi touch functionality to enabled/disabled. */
   public void setMultiTouchEnabled(boolean multiTouchEnabled) {
     if (mCropOverlayView.setMultiTouchEnabled(multiTouchEnabled)) {
       handleCropWindowChanged(false, false);
       mCropOverlayView.invalidate();
+
+      mCropOverlayView.setScaleGestureListener(new CropOverlayView.OnScaleGestureListener() {
+        @Override
+        public void onScaleGesturePerformed(float scale) {
+          adjustZoom(scale);
+        }
+      });
     }
   }
 
@@ -686,14 +703,14 @@ public class CropImageView extends FrameLayout {
 
     float[] points =
         new float[] {
-          cropWindowRect.left,
-          cropWindowRect.top,
-          cropWindowRect.right,
-          cropWindowRect.top,
-          cropWindowRect.right,
-          cropWindowRect.bottom,
-          cropWindowRect.left,
-          cropWindowRect.bottom
+            cropWindowRect.left,
+            cropWindowRect.top,
+            cropWindowRect.right,
+            cropWindowRect.top,
+            cropWindowRect.right,
+            cropWindowRect.bottom,
+            cropWindowRect.left,
+            cropWindowRect.bottom
         };
 
     mImageMatrix.invert(mImageInverseMatrix);
@@ -788,14 +805,14 @@ public class CropImageView extends FrameLayout {
       } else {
         croppedBitmap =
             BitmapUtils.cropBitmapObjectHandleOOM(
-                    mBitmap,
-                    getCropPoints(),
-                    mDegreesRotated,
-                    mCropOverlayView.isFixAspectRatio(),
-                    mCropOverlayView.getAspectRatioX(),
-                    mCropOverlayView.getAspectRatioY(),
-                    mFlipHorizontally,
-                    mFlipVertically)
+                mBitmap,
+                getCropPoints(),
+                mDegreesRotated,
+                mCropOverlayView.isFixAspectRatio(),
+                mCropOverlayView.getAspectRatioX(),
+                mCropOverlayView.getAspectRatioY(),
+                mFlipHorizontally,
+                mFlipVertically)
                 .bitmap;
       }
 
@@ -1683,18 +1700,18 @@ public class CropImageView extends FrameLayout {
             width > BitmapUtils.getRectWidth(mImagePoints)
                 ? 0
                 : Math.max(
-                        Math.min(
-                            width / 2 - cropRect.centerX(), -BitmapUtils.getRectLeft(mImagePoints)),
-                        getWidth() - BitmapUtils.getRectRight(mImagePoints))
-                    / scaleX;
+                Math.min(
+                    width / 2 - cropRect.centerX(), -BitmapUtils.getRectLeft(mImagePoints)),
+                getWidth() - BitmapUtils.getRectRight(mImagePoints))
+                / scaleX;
         mZoomOffsetY =
             height > BitmapUtils.getRectHeight(mImagePoints)
                 ? 0
                 : Math.max(
-                        Math.min(
-                            height / 2 - cropRect.centerY(), -BitmapUtils.getRectTop(mImagePoints)),
-                        getHeight() - BitmapUtils.getRectBottom(mImagePoints))
-                    / scaleY;
+                Math.min(
+                    height / 2 - cropRect.centerY(), -BitmapUtils.getRectTop(mImagePoints)),
+                getHeight() - BitmapUtils.getRectBottom(mImagePoints))
+                / scaleY;
       } else {
         // adjust the zoomed area so the crop window rectangle will be inside the area in case it
         // was moved outside
@@ -1796,7 +1813,7 @@ public class CropImageView extends FrameLayout {
     boolean visible =
         mShowProgressBar
             && (mBitmap == null && mBitmapLoadingWorkerTask != null
-                || mBitmapCroppingWorkerTask != null);
+            || mBitmapCroppingWorkerTask != null);
     mProgressBar.setVisibility(visible ? VISIBLE : INVISIBLE);
   }
 
