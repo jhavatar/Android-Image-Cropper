@@ -50,7 +50,7 @@ android {
 
 dependencies {
     api "androidx.appcompat:appcompat:$androidXLibraryVersion"
-    implementation "androidx.exifinterface:exifinterface:$androidXLibraryVersion"
+    api "androidx.exifinterface:exifinterface:$androidXLibraryVersion"
 }
 
 
