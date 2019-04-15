@@ -25,7 +25,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Parcelable;
-import androidx.exifinterface.media.ExifInterface;
 import android.util.AttributeSet;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -38,10 +37,10 @@ import android.widget.ProgressBar;
 import java.lang.ref.WeakReference;
 import java.util.UUID;
 
+import androidx.exifinterface.media.ExifInterface;
+
 /** Custom view that provides cropping capabilities to an image. */
 public class CropImageView extends FrameLayout {
-
-  // region: Fields and Consts
 
   /** Image view widget used to show the image for cropping. */
   private final ImageView mImageView;
@@ -346,6 +345,7 @@ public class CropImageView extends FrameLayout {
           }
         });
     mCropOverlayView.setInitialAttributeValues(options);
+    updateMultitouchEnabled(mCropOverlayView, options.multiTouchEnabled);
 
     mProgressBar = v.findViewById(R.id.CropProgressBar);
     setProgressBarVisibility();
@@ -404,18 +404,33 @@ public class CropImageView extends FrameLayout {
     mCropOverlayView.fixCurrentCropWindowRect();
   }
 
+
+  public boolean isMultitouchEnabled() {
+    return mCropOverlayView.isMultiTouchEnabled();
+  }
+
   /** Set multi touch functionality to enabled/disabled. */
   public void setMultiTouchEnabled(boolean multiTouchEnabled) {
     if (mCropOverlayView.setMultiTouchEnabled(multiTouchEnabled)) {
       handleCropWindowChanged(false, false);
       mCropOverlayView.invalidate();
+      updateMultitouchEnabled(mCropOverlayView, multiTouchEnabled);
+    }
+  }
 
-      mCropOverlayView.setScaleGestureListener(new CropOverlayView.OnScaleGestureListener() {
-        @Override
-        public void onScaleGesturePerformed(float scale) {
-          adjustZoom(scale);
-        }
-      });
+  private void updateMultitouchEnabled(CropOverlayView cropOverlayView, boolean multiTouchEnabled) {
+    if (cropOverlayView != null) {
+      if (multiTouchEnabled) {
+        cropOverlayView.setScaleGestureListener(new CropOverlayView.OnScaleGestureListener() {
+          @Override
+          public void onScaleGesturePerformed(float scale) {
+            adjustZoom(scale);
+          }
+        });
+
+      } else {
+        cropOverlayView.setScaleGestureListener(null);
+      }
     }
   }
 
