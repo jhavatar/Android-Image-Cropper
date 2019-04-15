@@ -325,6 +325,11 @@ public class CropOverlayView extends View {
     mSnapRadius = snapRadius;
   }
 
+
+  public boolean isMultiTouchEnabled() {
+    return mMultiTouchEnabled;
+  }
+
   /** Set multi touch functionality to enabled/disabled. */
   public boolean setMultiTouchEnabled(boolean multiTouchEnabled) {
     if (mMultiTouchEnabled != multiTouchEnabled) {
