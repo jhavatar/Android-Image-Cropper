@@ -1,8 +1,6 @@
 Android Image Cropper
 =======
-[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-Android--Image--Cropper-green.svg?style=true)](https://android-arsenal.com/details/1/3487)
-[![Build Status](https://travis-ci.org/ArthurHub/Android-Image-Cropper.svg?branch=master)](https://travis-ci.org/ArthurHub/Android-Image-Cropper)
-[ ![Download](https://api.bintray.com/packages/arthurhub/maven/Android-Image-Cropper/images/download.svg) ](https://bintray.com/arthurhub/maven/Android-Image-Cropper/_latestVersion)
+[![](https://jitpack.io/v/jhavatar/Android-Image-Cropper.svg)](https://jitpack.io/#jhavatar/Android-Image-Cropper)
 
 
 **Powerful** (Zoom, Rotation, Multi-Source), **customizable** (Shape, Limits, Style), **optimized** (Async, Sampling, Matrix) and **simple** image cropping library for Android.
@@ -16,9 +14,22 @@ Android Image Cropper
 
 1. Include the library
 
+Add in your root build.gradle
+
+```
+allprojects {
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
+```
+
+Add the dependency
+
  ```
  dependencies {
-     api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
+     implementation 'com.github.jhavatar:Android-Image-Cropper:2.8.5'
  }
  ```
 
@@ -127,6 +138,9 @@ For more information, see the [GitHub Wiki](https://github.com/ArthurHub/Android
  - [Adding auto-zoom feature to Android-Image-Cropper](https://theartofdev.com/2016/04/25/adding-auto-zoom-feature-to-android-image-cropper/)
 
 ## Change log
+*2.8.5*
+- Multitouch option enables image scaling instead of crop overlay manipulation
+
 *2.8.0*
 - Fix crash on Android O (thx @juliooa)
 - Update to support library to AndroidX (thx @mradzinski)
