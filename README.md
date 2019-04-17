@@ -139,7 +139,7 @@ For more information, see the [GitHub Wiki](https://github.com/ArthurHub/Android
 
 ## Change log
 *2.8.5*
-- Multitouch option enables image scaling instead of crop overlay manipulation
+- Multitouch option enables image scaling instead of crop overlay manipulation (thx @wrbl606)
 
 *2.8.0*
 - Fix crash on Android O (thx @juliooa)
