@@ -5,6 +5,8 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.3.2'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:0.9.16"
     }
 }
 
@@ -14,6 +16,7 @@ allprojects {
         maven {
             url "https://maven.google.com"
         }
+        maven { url 'https://jitpack.io' }
     }
 }
 
@@ -22,8 +25,8 @@ ext {
     buildToolsVersion = '28.0.3'
     androidXLibraryVersion = '1.0.0'
 
-    PUBLISH_GROUP_ID = 'com.theartofdev.edmodo'
+    PUBLISH_GROUP_ID = 'com.github.jhavatar'
     PUBLISH_ARTIFACT_ID = 'android-image-cropper'
-    PUBLISH_VERSION = '2.8.0'
+    PUBLISH_VERSION = '2.8.5'
     // gradlew clean build generateRelease
 }

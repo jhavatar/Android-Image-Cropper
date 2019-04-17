@@ -16,6 +16,7 @@ android {
 }
 
 dependencies {
-    api project(':cropper')
+//    api project(':cropper')
+    api "com.github.jhavatar:Android-Image-Cropper:${rootProject.ext.PUBLISH_VERSION}"
     api "androidx.appcompat:appcompat:$androidXLibraryVersion"
 }

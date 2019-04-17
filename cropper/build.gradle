@@ -1,7 +1,14 @@
 apply plugin: 'com.android.library'
 // https://docs.gradle.org/current/userguide/publishing_maven.html
 // http://www.flexlabs.org/2013/06/using-local-aar-android-library-packages-in-gradle-builds
-apply plugin: 'maven-publish'
+//apply plugin: 'maven-publish'
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'org.jetbrains.dokka'
+
+group = rootProject.ext.PUBLISH_GROUP_ID
+version = rootProject.ext.PUBLISH_VERSION
+def siteUrl = 'https://github.com/jhavatarAndroid-Image-Cropper'
+def gitUrl = 'https://github.com/jhavatar/Android-Image-Cropper.git'
 
 android {
 
@@ -25,24 +32,83 @@ android {
 // This configuration is used to publish the library to a local repo while a being forked and modified.
 // It should really be set up so that the version are all in line, and set to be a SNAPSHOT.
 // The version listed here is a temp hack to allow me to keep working.
-android.libraryVariants
-publishing {
-    publications {
-        maven(MavenPublication) {
+//android.libraryVariants
+//publishing {
+//    publications {
+//        maven(MavenPublication) {
+//
+//            groupId PUBLISH_GROUP_ID
+//            artifactId PUBLISH_ARTIFACT_ID
+//            version PUBLISH_VERSION + '-SNAPSHOT'
+//
+//            //artifact bundleRelease
+//        }
+//    }
+//}
+//
+//apply from: 'https://raw.githubusercontent.com/blundell/release-android-library/master/android-release-aar.gradle'
 
-            groupId PUBLISH_GROUP_ID
-            artifactId PUBLISH_ARTIFACT_ID
-            version PUBLISH_VERSION + '-SNAPSHOT'
+dependencies {
+    api "androidx.appcompat:appcompat:$androidXLibraryVersion"
+    api "androidx.exifinterface:exifinterface:$androidXLibraryVersion"
+}
 
-            //artifact bundleRelease
+
+if (project.hasProperty("android")) { // Android libraries
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.srcDirs
+    }
+} else { // Java libraries
+    task sourcesJar(type: Jar, dependsOn: classes) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
+}
+
+task javadocJar(type: Jar, dependsOn: dokka) {
+    classifier = 'javadoc'
+    from "$buildDir/javadoc"
+}
+
+dokka {
+    outputFormat = 'javadoc'
+    outputDirectory = "$buildDir/javadoc"
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+
+install {
+    repositories.mavenInstaller {
+        pom.project {
+            name = "Android-Image-Cropper"
+            description "Android-Image-Cropper"
+            url siteUrl
+            packaging "aar"
+            groupId rootProject.ext.PUBLISH_GROUP_ID
+            artifactId = "Android-Image-Cropper"
+            version rootProject.ext.PUBLISH_VERSION
+            scm {
+                connection gitUrl
+                url siteUrl
+            }
         }
     }
 }
 
-apply from: 'https://raw.githubusercontent.com/blundell/release-android-library/master/android-release-aar.gradle'
-
-dependencies {
-    api "androidx.appcompat:appcompat:$androidXLibraryVersion"
-    implementation "androidx.exifinterface:exifinterface:$androidXLibraryVersion"
-}
-
+//licenses {
+//    license {
+//        name "The Apache Software License, Version 2.0"
+//        url "http://www.apache.org/licenses/LICENSE-2.0.txt"
+//        distribution "repo"
+//    }
+//}
+//developers {
+//    developer {
+//        name 'jhavatar'
+//    }
+//}
